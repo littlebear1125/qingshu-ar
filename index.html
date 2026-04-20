@@ -7,66 +7,63 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { overflow:hidden; background:#d8f0e0; font-family:"PingFang SC",sans-serif; color:#1a4731; }
-
+    body { overflow:hidden; background:#c8e6c9; font-family:"PingFang SC",sans-serif; }
     #three-canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
 
-    /* 进入引导 */
     #splash {
       position:fixed; inset:0; z-index:999;
-      background:rgba(220,245,230,0.92);
+      background:rgba(200,230,200,0.93);
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       backdrop-filter:blur(6px);
     }
     #splash img { width:200px; height:auto; margin-bottom:24px;
-      filter:drop-shadow(0 4px 16px rgba(45,106,79,0.25));
+      filter:drop-shadow(0 4px 16px rgba(45,106,79,0.3));
       animation:floatY 3s ease-in-out infinite; }
     @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-    #splash p { font-size:13px; color:#52796f; letter-spacing:2px; margin-bottom:36px; }
+    #splash p { font-size:13px; color:#2d6a4f; letter-spacing:2px; margin-bottom:36px; }
     .enter-btn {
       padding:14px 52px; border-radius:50px;
-      background:linear-gradient(135deg,#2d6a4f,#40916c);
+      background:linear-gradient(135deg,#1b4332,#2d6a4f);
       color:#fff; font-size:17px; letter-spacing:3px; border:none; cursor:pointer;
-      box-shadow:0 4px 20px rgba(45,106,79,0.35);
+      box-shadow:0 4px 20px rgba(27,67,50,0.4);
       animation:pulsebtn 2s ease-in-out infinite;
     }
     @keyframes pulsebtn { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
     #splash.out { opacity:0; transition:opacity 0.8s; pointer-events:none; }
 
-    /* 主UI */
     #ui {
       position:fixed; inset:0; z-index:10;
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       pointer-events:none;
     }
     .card {
-      background:rgba(255,255,255,0.72);
-      border:1px solid rgba(45,106,79,0.2);
+      background:rgba(255,255,255,0.82);
+      border:1px solid rgba(45,106,79,0.25);
       border-radius:24px; padding:32px 28px;
       max-width:320px; width:90%; text-align:center;
-      backdrop-filter:blur(18px);
-      box-shadow:0 8px 40px rgba(45,106,79,0.15);
+      backdrop-filter:blur(20px);
+      box-shadow:0 8px 40px rgba(27,67,50,0.18);
       animation:cardIn 1s ease forwards;
       transition:transform 0.12s ease;
     }
     @keyframes cardIn { from{opacity:0;transform:perspective(800px) rotateX(15deg) translateY(40px)} to{opacity:1;transform:perspective(800px) rotateX(0deg) translateY(0)} }
     .logo-wrap {
       padding:12px 16px; border-radius:14px;
-      background:rgba(216,240,224,0.6);
-      border:1px solid rgba(82,183,136,0.25);
+      background:rgba(200,230,200,0.5);
+      border:1px solid rgba(45,106,79,0.2);
       margin-bottom:18px;
     }
     .logo-wrap img { width:190px; height:auto; }
     .divider { width:44px; height:2px; background:linear-gradient(90deg,transparent,#2d6a4f,transparent); margin:0 auto 12px; }
-    .sub { font-size:11px; color:#74a892; letter-spacing:2px; margin-bottom:20px; }
+    .sub { font-size:11px; color:#52796f; letter-spacing:2px; margin-bottom:20px; }
     .hr { width:100%; height:1px; background:linear-gradient(90deg,transparent,rgba(45,106,79,0.2),transparent); margin-bottom:20px; }
     .poem { display:flex; flex-direction:column; gap:12px; margin-bottom:20px; }
-    .line { font-size:14px; line-height:1.8; color:#2d4a3e; opacity:0; animation:lineIn 0.8s ease forwards; }
+    .line { font-size:14px; line-height:1.8; color:#1b4332; opacity:0; animation:lineIn 0.8s ease forwards; }
     .line:nth-child(1){animation-delay:0.3s}
     .line:nth-child(2){animation-delay:1s}
-    .line:nth-child(3){animation-delay:1.7s; color:#1a4731; font-size:15px; font-weight:600;}
+    .line:nth-child(3){animation-delay:1.7s; color:#1b4332; font-size:15px; font-weight:700;}
     @keyframes lineIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-    .footer { font-size:10px; color:#95b5a8; letter-spacing:1px; }
+    .footer { font-size:10px; color:#74a892; letter-spacing:1px; }
 
     #musicBtn {
       position:fixed; bottom:20px; right:20px; z-index:20;
@@ -104,152 +101,160 @@
 <div id="musicBtn">🎶</div>
 
 <script>
-// ===== Three.js 浅绿3D场景 =====
 const canvas = document.getElementById('three-canvas');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.setSize(innerWidth, innerHeight);
-renderer.setClearColor(0xd4edda, 1); // 浅绿背景色
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.4;
+renderer.toneMappingExposure = 1.6;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xd4edda);
-scene.fog = new THREE.Fog(0xc8e6c9, 15, 40);
+// 浅绿天空背景渐变
+scene.background = new THREE.Color(0xc8e6c9);
+// 远处薄雾
+scene.fog = new THREE.Fog(0xdcedc8, 18, 45);
 
 const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
 camera.position.set(0, 2, 12);
 camera.lookAt(0, 1, 0);
 
-// 光照（明亮自然光）
-const ambLight = new THREE.AmbientLight(0xe8f5e9, 3.5);
-scene.add(ambLight);
-const sunLight = new THREE.DirectionalLight(0xffffff, 2.5);
-sunLight.position.set(8, 15, 8);
-scene.add(sunLight);
-const fillLight = new THREE.DirectionalLight(0xa8d8b9, 1.2);
-fillLight.position.set(-5, 5, -3);
-scene.add(fillLight);
+// 充足的自然光
+scene.add(new THREE.AmbientLight(0xe8f5e9, 4));
+const sun = new THREE.DirectionalLight(0xffffff, 3);
+sun.position.set(10, 20, 10);
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xb2dfdb, 1.5);
+fill.position.set(-8, 8, -5);
+scene.add(fill);
 
-// 竹子
-function makeBamboo(x, z, height, col) {
+// 竹子：深绿色，与浅绿背景形成强对比
+function makeBamboo(x, z, height) {
   const g = new THREE.Group();
   const segs = Math.floor(height/1.2);
+  
   for(let i=0;i<segs;i++) {
     const r = Math.max(0.05, 0.09-i*0.003);
-    const geo = new THREE.CylinderGeometry(r-0.01, r, 1.1, 8);
-    const mat = new THREE.MeshLambertMaterial({color: col||0x52b788});
+    // 竹干：深墨绿色
+    const geo = new THREE.CylinderGeometry(r-0.01, r, 1.15, 8);
+    const mat = new THREE.MeshLambertMaterial({color:0x1b4332});
     const m = new THREE.Mesh(geo, mat);
-    m.position.y = i*1.15+0.55;
+    m.position.y = i*1.18+0.58;
     g.add(m);
-    const rg = new THREE.TorusGeometry(r+0.015, 0.02, 6, 10);
-    const rm = new THREE.MeshLambertMaterial({color:0x2d6a4f});
+    // 竹节：更深的环
+    const rg = new THREE.TorusGeometry(r+0.015, 0.025, 6, 10);
+    const rm = new THREE.MeshLambertMaterial({color:0x0d2b1a});
     const ring = new THREE.Mesh(rg, rm);
     ring.rotation.x = Math.PI/2;
-    ring.position.y = i*1.15+1.1;
+    ring.position.y = i*1.18+1.15;
     g.add(ring);
   }
-  for(let i=0;i<10;i++) {
-    const lg = new THREE.SphereGeometry(0.22,6,4);
-    lg.scale(2.8, 0.28, 0.7);
-    const lm = new THREE.MeshLambertMaterial({color:0x74c69d, transparent:true, opacity:0.9});
+  
+  // 竹叶：深绿色，清晰可见
+  for(let i=0;i<12;i++) {
+    const lg = new THREE.SphereGeometry(0.2,6,4);
+    lg.scale(3.2, 0.25, 0.6);
+    // 交替深绿/中绿，增加层次感
+    const leafColor = i%2===0 ? 0x2d6a4f : 0x1b4332;
+    const lm = new THREE.MeshLambertMaterial({color:leafColor});
     const leaf = new THREE.Mesh(lg, lm);
-    const a = (i/10)*Math.PI*2;
-    const ht = (segs-1)*1.15 + 0.3 + Math.random()*1.8;
-    leaf.position.set(Math.cos(a)*0.65, ht, Math.sin(a)*0.45);
+    const a = (i/12)*Math.PI*2;
+    const ht = (segs-1)*1.18 + 0.2 + Math.random()*2.0;
+    leaf.position.set(Math.cos(a)*0.7, ht, Math.sin(a)*0.5);
     leaf.rotation.z = a + Math.PI/5;
+    leaf.rotation.x = (Math.random()-0.5)*0.3;
     g.add(leaf);
   }
+  
   g.position.set(x, -3, z);
   g.rotation.z = (Math.random()-0.5)*0.1;
+  g.rotation.x = (Math.random()-0.5)*0.06;
   return g;
 }
 
 const bamboos = [];
-[[-5,-2,8,0x52b788],[-3.5,-4,7,0x74c69d],[3,-3,9,0x40916c],
- [5,-1,7,0x95d5b2],[-6,1,6,0x52b788],[4.5,2,8,0x74c69d],
- [-2,-6,10,0x40916c],[2,-5,9,0x95d5b2],[-7,-3,7,0x52b788],
- [7,-4,8,0x74c69d]].forEach(([x,z,h,c]) => {
-  const b = makeBamboo(x,z,h,c);
+// 增加更多竹子，分布更广
+[[-5,-2,9],[-3.5,-4,8],[3,-3,10],[5,-1,8],[-6,1,7],
+ [4.5,2,9],[-2,-6,11],[2,-5,10],[-7,-3,8],[7,-4,9],
+ [-4,3,7],[6,1,8],[-1,-8,12],[4,-7,9]
+].forEach(([x,z,h]) => {
+  const b = makeBamboo(x,z,h);
   scene.add(b); bamboos.push(b);
 });
 
-// 浅绿地面
-const groundGeo = new THREE.PlaneGeometry(60, 60);
-const groundMat = new THREE.MeshLambertMaterial({color:0xb7dfc4});
-const ground = new THREE.Mesh(groundGeo, groundMat);
+// 浅绿草地
+const groundMat = new THREE.MeshLambertMaterial({color:0xa5d6a7});
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(80,80), groundMat);
 ground.rotation.x = -Math.PI/2;
 ground.position.y = -3;
 scene.add(ground);
 
-// 飘落绿叶粒子
-const pCount = 150;
+// 飘落的叶子粒子（深绿色，在浅绿背景下清晰）
+const pCount = 120;
 const pPos = new Float32Array(pCount*3);
-const pSpeed = [];
+const pSpd = [];
 for(let i=0;i<pCount;i++) {
-  pPos[i*3]=(Math.random()-0.5)*30;
-  pPos[i*3+1]=(Math.random()-0.5)*18;
-  pPos[i*3+2]=(Math.random()-0.5)*18;
-  pSpeed.push({x:(Math.random()-0.5)*0.006, y:0.004+Math.random()*0.008, z:(Math.random()-0.5)*0.004});
+  pPos[i*3]=(Math.random()-0.5)*32;
+  pPos[i*3+1]=(Math.random()-0.5)*20;
+  pPos[i*3+2]=(Math.random()-0.5)*20;
+  pSpd.push({x:(Math.random()-0.5)*0.006, y:0.004+Math.random()*0.008, z:(Math.random()-0.5)*0.004});
 }
 const pGeo = new THREE.BufferGeometry();
 pGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
-const pMat = new THREE.PointsMaterial({color:0x40916c, size:0.12, transparent:true, opacity:0.65});
-const pts = new THREE.Points(pGeo, pMat);
-scene.add(pts);
+// 深绿粒子，在浅绿背景下可见
+const pMat = new THREE.PointsMaterial({color:0x2d6a4f, size:0.15, transparent:true, opacity:0.8});
+scene.add(new THREE.Points(pGeo, pMat));
 
-// 视差
 let mx=0, my=0;
 window.addEventListener('mousemove', e=>{ mx=(e.clientX/innerWidth-0.5)*2; my=(e.clientY/innerHeight-0.5)*2; });
-window.addEventListener('touchmove', e=>{ const t=e.touches[0]; mx=(t.clientX/innerWidth-0.5)*2; my=(t.clientY/innerHeight-0.5)*2; });
-let gyroX=0, gyroY=0;
-window.addEventListener('deviceorientation', e=>{ gyroX=(e.beta||0)*0.002; gyroY=(e.gamma||0)*0.002; });
+window.addEventListener('touchmove', e=>{ const t=e.touches[0]; mx=(t.clientX/innerWidth-0.5)*2; my=(t.clientY/innerHeight-0.5)*2; }, {passive:true});
+let gx=0,gy=0;
+window.addEventListener('deviceorientation', e=>{ gx=(e.beta||0)*0.002; gy=(e.gamma||0)*0.002; });
 window.addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
 
 let tt=0;
-function animate(){
+(function animate(){
   requestAnimationFrame(animate); tt+=0.01;
-  bamboos.forEach((b,i)=>{ b.rotation.z=Math.sin(tt*0.5+i*0.8)*0.05; });
+  bamboos.forEach((b,i)=>{ b.rotation.z=Math.sin(tt*0.45+i*0.9)*0.06; });
   const pos=pGeo.attributes.position.array;
   for(let i=0;i<pCount;i++){
-    pos[i*3]+=pSpeed[i].x; pos[i*3+1]+=pSpeed[i].y; pos[i*3+2]+=pSpeed[i].z;
+    pos[i*3]+=pSpd[i].x; pos[i*3+1]+=pSpd[i].y; pos[i*3+2]+=pSpd[i].z;
     if(pos[i*3+1]>12) pos[i*3+1]=-8;
   }
   pGeo.attributes.position.needsUpdate=true;
-  camera.position.x=Math.sin(tt*0.15)*1.5+mx*0.8+gyroY*3;
-  camera.position.y=2+Math.cos(tt*0.1)*0.5-my*0.4-gyroX*2;
+  camera.position.x=Math.sin(tt*0.15)*1.5+mx*0.8+gy*3;
+  camera.position.y=2+Math.cos(tt*0.1)*0.5-my*0.4-gx*2;
   camera.lookAt(0,1,0);
   const card=document.getElementById('card');
   if(card) card.style.transform=`perspective(800px) rotateY(${mx*4}deg) rotateX(${-my*2.5}deg)`;
   renderer.render(scene,camera);
-}
-animate();
+})();
 
 // 音乐
-let audioCtx=null, isPlaying=false, loopTimer=null;
-const melody=[[392,1.2,0],[440,0.8,1.3],[523.25,1.5,2.2],[587.33,1.0,3.8],[659.25,2.0,4.9],[587.33,0.8,7.0],[523.25,1.2,7.9],[440,1.5,9.2],[392,0.8,10.8],[523.25,1.0,11.7],[659.25,1.5,12.8],[783.99,2.0,14.4],[659.25,1.2,16.5],[523.25,2.5,17.8]];
-function playNote(ctx,freq,start,dur){
-  const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();
-  f.type='lowpass'; f.frequency.value=1400; o.type='sine'; o.frequency.value=freq;
-  const t=ctx.currentTime+start;
-  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.13,t+0.25); g.gain.linearRampToValueAtTime(0,t+dur);
+let actx=null, playing=false, lt=null;
+const mel=[[392,1.2,0],[440,0.8,1.3],[523.25,1.5,2.2],[587.33,1.0,3.8],[659.25,2.0,4.9],[587.33,0.8,7.0],[523.25,1.2,7.9],[440,1.5,9.2],[392,0.8,10.8],[523.25,1.0,11.7],[659.25,1.5,12.8],[783.99,2.0,14.4],[659.25,1.2,16.5],[523.25,2.5,17.8]];
+function pn(ctx,freq,st,dur){
+  const o=ctx.createOscillator(),gn=ctx.createGain(),f=ctx.createBiquadFilter();
+  f.type='lowpass';f.frequency.value=1400;o.type='sine';o.frequency.value=freq;
+  const t=ctx.currentTime+st;
+  gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(0.13,t+0.25);gn.gain.linearRampToValueAtTime(0,t+dur);
   const o2=ctx.createOscillator(),g2=ctx.createGain();
-  o2.type='sine'; o2.frequency.value=freq/2;
-  g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(0.04,t+0.3); g2.gain.linearRampToValueAtTime(0,t+dur);
-  o2.connect(g2); g2.connect(ctx.destination); o2.start(t); o2.stop(t+dur+0.1);
-  o.connect(f); f.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+dur+0.1);
+  o2.type='sine';o2.frequency.value=freq/2;
+  g2.gain.setValueAtTime(0,t);g2.gain.linearRampToValueAtTime(0.04,t+0.3);g2.gain.linearRampToValueAtTime(0,t+dur);
+  o2.connect(g2);g2.connect(ctx.destination);o2.start(t);o2.stop(t+dur+0.1);
+  o.connect(f);f.connect(gn);gn.connect(ctx.destination);o.start(t);o.stop(t+dur+0.1);
 }
-function playLoop(){ if(!isPlaying||!audioCtx)return; melody.forEach(([f,d,dl])=>playNote(audioCtx,f,dl,d)); loopTimer=setTimeout(playLoop,21000); }
-function startMusic(){ if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended')audioCtx.resume(); isPlaying=true; playLoop(); }
-function stopMusic(){ isPlaying=false; clearTimeout(loopTimer); if(audioCtx)audioCtx.suspend(); }
-document.getElementById('musicBtn').onclick=()=>{
-  if(isPlaying){stopMusic();document.getElementById('musicBtn').style.animation='none';document.getElementById('musicBtn').textContent='🎵';}
-  else{startMusic();document.getElementById('musicBtn').style.animation='spin 4s linear infinite';document.getElementById('musicBtn').textContent='🎶';}
+function loop(){ if(!playing||!actx)return; mel.forEach(([f,d,dl])=>pn(actx,f,dl,d)); lt=setTimeout(loop,21000); }
+function startM(){ if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended')actx.resume(); playing=true; loop(); }
+function stopM(){ playing=false; clearTimeout(lt); if(actx)actx.suspend(); }
+const btn=document.getElementById('musicBtn');
+btn.onclick=()=>{
+  if(playing){stopM();btn.style.animation='none';btn.textContent='🎵';}
+  else{startM();btn.style.animation='spin 4s linear infinite';btn.textContent='🎶';}
 };
 function enterPage(){
   document.getElementById('splash').classList.add('out');
   setTimeout(()=>document.getElementById('splash').style.display='none',800);
-  startMusic();
+  startM();
 }
 </script>
 </body>
